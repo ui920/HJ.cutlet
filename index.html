@@ -4,8 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HJ.cutlet</title>
+    <link rel="stylesheet" href="./style.css" />
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        }
+      }
+    </script>
   </head>
   <body>
-    <h1>HJ.cutlet</h1>
+    <div class="guide">DRAG TO ROTATE · SCROLL TO ZOOM</div>
+    <canvas id="webgl"></canvas>
+    <script type="module" src="./main.js"></script>
   </body>
 </html>
