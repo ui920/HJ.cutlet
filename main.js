@@ -13,7 +13,8 @@ const camera = new THREE.PerspectiveCamera(
   1000,
 );
 
-camera.position.set(0, 7, 10);
+// 카메라 초기 위치
+camera.position.set(-20, 8, 18);
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
@@ -35,7 +36,12 @@ controls.enableRotate = true;
 controls.enablePan = true;
 
 controls.minDistance = 3;
-controls.maxDistance = 25;
+controls.maxDistance = 30;
+
+// 처음 접속했을 때 카메라가 바라보는 위치
+// 숫자가 커질수록 사진이 화면 아래쪽으로 내려가 보임
+controls.target.set(0, 2.5, 0);
+controls.update();
 
 // Light
 const ambientLight = new THREE.AmbientLight(0xffffff, 2);
@@ -48,35 +54,44 @@ scene.add(directionalLight);
 // Texture Loader
 const loader = new THREE.TextureLoader();
 
-loader.load('./image/bg.jpg', (texture) => {
-  texture.colorSpace = THREE.SRGBColorSpace;
+loader.load(
+  './image/bg.jpg',
+  (texture) => {
+    texture.colorSpace = THREE.SRGBColorSpace;
 
-  const imageWidth = texture.image.width;
-  const imageHeight = texture.image.height;
+    const imageWidth = texture.image.width;
+    const imageHeight = texture.image.height;
 
-  const aspectRatio = imageWidth / imageHeight;
+    const aspectRatio = imageWidth / imageHeight;
 
-  // 사진 비율 유지
-  const planeWidth = 8;
-  const planeHeight = planeWidth / aspectRatio;
+    // 사진 크기
+    const planeWidth = 58;
+    const planeHeight = planeWidth / aspectRatio;
 
-  // 사진을 입힌 3D 평면
-  const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+    // 사진을 입힌 3D 평면
+    const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
 
-  const material = new THREE.MeshStandardMaterial({
-    map: texture,
-    side: THREE.DoubleSide,
-    roughness: 0.8,
-  });
+    const material = new THREE.MeshStandardMaterial({
+      map: texture,
+      side: THREE.DoubleSide,
+      roughness: 0.8,
+    });
 
-  const fryerPhoto = new THREE.Mesh(geometry, material);
+    const fryerPhoto = new THREE.Mesh(geometry, material);
 
-  // 바닥에 눕혀 배치
-  fryerPhoto.rotation.x = -Math.PI / 2;
-  fryerPhoto.position.y = 0;
+    // 바닥에 눕혀 배치
+    fryerPhoto.rotation.x = -Math.PI / 2;
 
-  scene.add(fryerPhoto);
-});
+    // 사진 위치
+    fryerPhoto.position.set(0, 0, 1.5);
+
+    scene.add(fryerPhoto);
+  },
+  undefined,
+  (error) => {
+    console.error('튀김기 사진을 불러오지 못했습니다.', error);
+  },
+);
 
 // Resize
 window.addEventListener('resize', () => {
