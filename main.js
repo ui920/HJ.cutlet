@@ -1,9 +1,25 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { createTonkatsuSystem } from './tonkatsu.js';
 
 // Scene
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xeacf03);
+
+// 배경 사진
+const bgLoader = new THREE.TextureLoader();
+
+bgLoader.load(
+  './image/backg.jpg',
+  (texture) => {
+    texture.colorSpace = THREE.SRGBColorSpace;
+    scene.background = texture;
+    console.log('배경 사진 로딩 성공!');
+  },
+  undefined,
+  (error) => {
+    console.error('배경 사진 로딩 실패! 파일 경로를 확인해 주세요.', error);
+  },
+);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(
@@ -13,7 +29,6 @@ const camera = new THREE.PerspectiveCamera(
   1000,
 );
 
-// 카메라 초기 위치
 camera.position.set(-20, 8, 18);
 
 // Renderer
@@ -38,10 +53,11 @@ controls.enablePan = true;
 controls.minDistance = 3;
 controls.maxDistance = 30;
 
-// 처음 접속했을 때 카메라가 바라보는 위치
-// 숫자가 커질수록 사진이 화면 아래쪽으로 내려가 보임
 controls.target.set(0, 2.5, 0);
 controls.update();
+
+// 돈까스 시스템 연결
+const tonkatsuSystem = createTonkatsuSystem(scene, camera, renderer.domElement);
 
 // Light
 const ambientLight = new THREE.AmbientLight(0xffffff, 2);
@@ -51,7 +67,7 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
 directionalLight.position.set(5, 10, 5);
 scene.add(directionalLight);
 
-// Texture Loader
+// 튀김기 사진 로딩
 const loader = new THREE.TextureLoader();
 
 loader.load(
@@ -64,11 +80,9 @@ loader.load(
 
     const aspectRatio = imageWidth / imageHeight;
 
-    // 사진 크기
-    const planeWidth = 58;
+    const planeWidth = 54;
     const planeHeight = planeWidth / aspectRatio;
 
-    // 사진을 입힌 3D 평면
     const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
 
     const material = new THREE.MeshStandardMaterial({
@@ -79,17 +93,19 @@ loader.load(
 
     const fryerPhoto = new THREE.Mesh(geometry, material);
 
-    // 바닥에 눕혀 배치
     fryerPhoto.rotation.x = -Math.PI / 2;
-
-    // 사진 위치
     fryerPhoto.position.set(0, 0, 1.5);
 
     scene.add(fryerPhoto);
+
+    // ★ 사진이 실제로 로딩된 후 돈까스 시스템에 전달
+    tonkatsuSystem.setFryerPhoto(fryerPhoto);
+
+    console.log('튀김기 사진 로딩 성공!');
   },
   undefined,
   (error) => {
-    console.error('튀김기 사진을 불러오지 못했습니다.', error);
+    console.error('튀김기 사진 로딩 실패! 파일 경로를 확인해 주세요.', error);
   },
 );
 
@@ -102,10 +118,17 @@ window.addEventListener('resize', () => {
 });
 
 // Animation
+const clock = new THREE.Clock();
+
 function animate() {
   requestAnimationFrame(animate);
 
+  const delta = Math.min(clock.getDelta(), 0.05);
+
   controls.update();
+
+  tonkatsuSystem.update(delta);
+
   renderer.render(scene, camera);
 }
 

@@ -16,8 +16,57 @@
     </script>
   </head>
   <body>
-    <div class="guide">DRAG TO ROTATE · SCROLL TO ZOOM</div>
+    <div class="marquee">
+      <div class="track" id="marqueeTrack">
+        <div class="marquee-group" id="marqueeGroupA">
+          <span class="marquee-item">
+            본 사이트는 호정의 생일을 기념하여 제작된 비공식 튀김 시설입니다.
+            &nbsp; • &nbsp; 튀김기를 클릭하면 노릇노릇한 호까스가 투입됩니다.
+            &nbsp; • &nbsp; さあ、揚げましょう！ &nbsp; • &nbsp; 호까스를
+            클릭하면 재도약의 기회가 주어집니다. &nbsp; • &nbsp; 튀김기를 Zoom
+            in, Turn around! &nbsp; • &nbsp;
+          </span>
+        </div>
+
+        <div class="marquee-group" id="marqueeGroupB" aria-hidden="true"></div>
+      </div>
+    </div>
+
     <canvas id="webgl"></canvas>
+    <script type="module" src="./main.js"></script>
+    <!-- <script type="module" src="./tonkatsu.js"></script> -->
+    <script>
+      const groupA = document.querySelector('#marqueeGroupA');
+      const groupB = document.querySelector('#marqueeGroupB');
+
+      const originalContent = groupA.innerHTML;
+
+      function setupMarquee() {
+        // 기존 반복 문장 초기화
+        groupA.innerHTML = originalContent;
+
+        const firstItem = groupA.firstElementChild;
+        const itemWidth = firstItem.getBoundingClientRect().width;
+
+        if (!itemWidth) return;
+
+        // 화면 너비보다 충분히 길어질 때까지 문장 반복
+        const copies = Math.ceil((window.innerWidth * 1.5) / itemWidth);
+
+        for (let i = 1; i < copies; i++) {
+          groupA.appendChild(firstItem.cloneNode(true));
+        }
+
+        // 완전히 동일한 두 번째 묶음 생성
+        groupB.innerHTML = groupA.innerHTML;
+      }
+
+      setupMarquee();
+
+      // 브라우저 크기가 바뀌어도 빈 공간이 생기지 않도록 재설정
+      window.addEventListener('resize', setupMarquee);
+    </script>
+
     <script type="module" src="./main.js"></script>
   </body>
 </html>

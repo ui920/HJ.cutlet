@@ -22,7 +22,7 @@ body {
   outline: none;
 }
 
-.guide {
+/* .guide {
   position: fixed;
   top: 24px;
   right: 28px;
@@ -34,4 +34,51 @@ body {
   font-family: Arial, sans-serif;
   font-size: 11px;
   pointer-events: none;
+} */
+
+/* 움직이는 텍스트 영역 */
+.marquee {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 35px;
+  overflow: hidden;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  background-color: #eacf03;
+  color: #111;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  flex-shrink: 0;
+  animation: marquee 50s linear infinite;
+  will-change: transform;
+}
+
+.marquee-group {
+  display: flex;
+  flex: 0 0 auto;
+  width: max-content;
+  white-space: nowrap;
+}
+
+.marquee-item {
+  display: block;
+  flex: 0 0 auto;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
 }
