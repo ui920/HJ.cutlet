@@ -47,10 +47,12 @@ const camera = new THREE.PerspectiveCamera(
   1000,
 );
 
-// PC 카메라 위치는 기존 설정 유지
+// PC와 모바일 카메라 위치 분리
 if (isMobile) {
-  camera.position.set(-15, 9, 32);
+  // 모바일: 위에서 내려다보는 구도
+  camera.position.set(-20, 17, 19.8);
 } else {
+  // PC: 기존 구도 유지
   camera.position.set(-20, 5, 18);
 }
 
@@ -98,14 +100,14 @@ controls.update();
 function updateResponsiveCamera() {
   const nowMobile = mobileQuery.matches;
 
-  // 화면 유형이 바뀌었을 때만 카메라 위치 변경
+  // PC와 모바일 화면이 전환되었을 때만 카메라 위치 변경
   if (nowMobile !== isMobile) {
     isMobile = nowMobile;
 
     if (isMobile) {
       // 모바일 카메라
       camera.fov = 55;
-      camera.position.set(-15, 9, 32);
+      camera.position.set(-15, 28, 32);
 
       controls.maxDistance = 45;
     } else {
@@ -121,6 +123,7 @@ function updateResponsiveCamera() {
     controls.update();
   }
 
+  // 화면 비율 업데이트
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 }
@@ -201,6 +204,7 @@ loader.load(
 
     const fryerPhoto = new THREE.Mesh(geometry, material);
 
+    // 튀김기 사진 회전: PC와 모바일 동일하게 유지
     fryerPhoto.rotation.x = -Math.PI / 2;
 
     // 기존 튀김기 사진 위치 유지
@@ -215,6 +219,7 @@ loader.load(
     tonkatsuSystem.setFryerPhoto(fryerPhoto);
 
     console.log('튀김기 사진 로딩 성공!');
+    console.log('튀김기 그림자 수신 설정 완료!');
   },
   undefined,
   (error) => {
@@ -292,6 +297,7 @@ const crossfadeDuration = 0.8;
 
 async function loadFryingSound() {
   try {
+    // MP3 파일 불러오기
     const response = await fetch('zigle_sound.mp3');
 
     if (!response.ok) {
@@ -300,6 +306,7 @@ async function loadFryingSound() {
 
     const arrayBuffer = await response.arrayBuffer();
 
+    // 오디오 데이터 디코딩
     const originalBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
     const sampleRate = originalBuffer.sampleRate;
@@ -308,16 +315,19 @@ async function loadFryingSound() {
 
     const totalLength = originalBuffer.length;
 
+    // 크로스페이드 구간이 너무 긴 경우 방지
     if (fadeLength * 2 >= totalLength) {
       throw new Error('크로스페이드 구간이 원본 사운드보다 깁니다.');
     }
 
+    // 새로운 오디오 버퍼 생성
     loopBuffer = audioContext.createBuffer(
       originalBuffer.numberOfChannels,
       totalLength - fadeLength,
       sampleRate,
     );
 
+    // 채널별로 크로스페이드 적용
     for (
       let channel = 0;
       channel < originalBuffer.numberOfChannels;
@@ -327,8 +337,10 @@ async function loadFryingSound() {
 
       const result = loopBuffer.getChannelData(channel);
 
+      // 원본의 중간 부분 복사
       result.set(original.subarray(fadeLength, totalLength - fadeLength), 0);
 
+      // 끝부분과 시작 부분을 자연스럽게 혼합
       for (let i = 0; i < fadeLength; i++) {
         const progress = i / (fadeLength - 1);
 
@@ -343,6 +355,7 @@ async function loadFryingSound() {
     }
 
     console.log('튀김 소리 크로스페이드 준비 완료!');
+    console.log('자연스러운 반복 재생 준비 완료!');
   } catch (error) {
     console.error('튀김 소리 로딩 실패:', error);
   }
@@ -356,23 +369,30 @@ async function playSound() {
   if (!soundEnabled || isSoundPlaying) return;
 
   try {
+    // 오디오 로딩이 끝날 때까지 대기
     if (!loopBuffer) {
       await loadFryingSound();
     }
 
     if (!loopBuffer || !soundEnabled || isSoundPlaying) return;
 
+    // 브라우저 오디오 활성화
     if (audioContext.state === 'suspended') {
       await audioContext.resume();
     }
 
+    // 새로운 오디오 소스 생성
     loopSource = audioContext.createBufferSource();
 
     loopSource.buffer = loopBuffer;
+
+    // 편집된 사운드 반복 재생
     loopSource.loop = true;
 
+    // 출력 연결
     loopSource.connect(audioContext.destination);
 
+    // 재생 시작
     loopSource.start(0);
 
     isSoundPlaying = true;
@@ -430,6 +450,7 @@ playSound();
 document.addEventListener(
   'pointerdown',
   (event) => {
+    // 돼지 버튼을 누른 경우 제외
     if (event.target.closest('#soundButton')) return;
 
     if (soundEnabled && !isSoundPlaying) {

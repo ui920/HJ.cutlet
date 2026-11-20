@@ -116,7 +116,7 @@ export function createTonkatsuSystem(scene, camera, canvas) {
   const colorOverlayMaterial = new THREE.MeshBasicMaterial({
     color: 0xbb5e1c,
     transparent: true,
-    opacity: 0.35,
+    opacity: 0.45,
     depthWrite: false,
   });
 
