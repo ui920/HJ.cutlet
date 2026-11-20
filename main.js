@@ -24,25 +24,38 @@ bgLoader.load(
   },
   undefined,
   (error) => {
-    console.error('배경 사진 로딩 실패! 파일 경로를 확인해 주세요.', error);
+    console.error('배경 사진 로딩 실패!', error);
   },
 );
 
 // =====================================
-// 3. Camera
+// 3. 모바일 화면 확인
+// =====================================
+
+const mobileQuery = window.matchMedia('(max-width: 768px)');
+
+let isMobile = mobileQuery.matches;
+
+// =====================================
+// 4. Camera
 // =====================================
 
 const camera = new THREE.PerspectiveCamera(
-  40,
+  isMobile ? 55 : 40,
   window.innerWidth / window.innerHeight,
   0.1,
   1000,
 );
 
-camera.position.set(-20, 5, 18);
+// PC 카메라 위치는 기존 설정 유지
+if (isMobile) {
+  camera.position.set(-15, 9, 32);
+} else {
+  camera.position.set(-20, 5, 18);
+}
 
 // =====================================
-// 4. Renderer
+// 5. Renderer
 // =====================================
 
 const renderer = new THREE.WebGLRenderer({
@@ -51,6 +64,7 @@ const renderer = new THREE.WebGLRenderer({
 });
 
 renderer.setSize(window.innerWidth, window.innerHeight);
+
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 // 그림자 활성화
@@ -58,7 +72,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 // =====================================
-// 5. Orbit Controls
+// 6. Orbit Controls
 // =====================================
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -71,19 +85,54 @@ controls.enableRotate = true;
 controls.enablePan = true;
 
 controls.minDistance = 3;
-controls.maxDistance = 30;
+controls.maxDistance = isMobile ? 45 : 30;
 
 controls.target.set(0, 2.5, 0);
+
 controls.update();
 
 // =====================================
-// 6. 돈까스 시스템 연결
+// 7. 모바일 카메라 설정
+// =====================================
+
+function updateResponsiveCamera() {
+  const nowMobile = mobileQuery.matches;
+
+  // 화면 유형이 바뀌었을 때만 카메라 위치 변경
+  if (nowMobile !== isMobile) {
+    isMobile = nowMobile;
+
+    if (isMobile) {
+      // 모바일 카메라
+      camera.fov = 55;
+      camera.position.set(-15, 9, 32);
+
+      controls.maxDistance = 45;
+    } else {
+      // PC 카메라: 기존 구도 유지
+      camera.fov = 40;
+      camera.position.set(-20, 5, 18);
+
+      controls.maxDistance = 30;
+    }
+
+    controls.target.set(0, 2.5, 0);
+
+    controls.update();
+  }
+
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+}
+
+// =====================================
+// 8. 돈까스 시스템 연결
 // =====================================
 
 const tonkatsuSystem = createTonkatsuSystem(scene, camera, renderer.domElement);
 
 // =====================================
-// 7. Light
+// 9. Light
 // =====================================
 
 // 전체적인 밝기
@@ -124,7 +173,7 @@ directionalLight.shadow.camera.updateProjectionMatrix();
 scene.add(directionalLight);
 
 // =====================================
-// 8. 튀김기 사진 로딩
+// 10. 튀김기 사진 로딩
 // =====================================
 
 const loader = new THREE.TextureLoader();
@@ -162,33 +211,42 @@ loader.load(
 
     scene.add(fryerPhoto);
 
-    // 사진이 로딩된 후 돈까스 시스템에 전달
+    // 돈까스 시스템에 전달
     tonkatsuSystem.setFryerPhoto(fryerPhoto);
 
     console.log('튀김기 사진 로딩 성공!');
-    console.log('튀김기 그림자 수신 설정 완료!');
   },
   undefined,
   (error) => {
-    console.error('튀김기 사진 로딩 실패! 파일 경로를 확인해 주세요.', error);
+    console.error('튀김기 사진 로딩 실패!', error);
   },
 );
 
 // =====================================
-// 9. Resize
+// 11. Resize
 // =====================================
 
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-
-  camera.updateProjectionMatrix();
+  updateResponsiveCamera();
 
   renderer.setSize(window.innerWidth, window.innerHeight);
+
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
+// 모바일 화면 방향 변경 대응
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => {
+    updateResponsiveCamera();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  }, 200);
+});
+
 // =====================================
-// 10. Animation
+// 12. Animation
 // =====================================
 
 const clock = new THREE.Clock();
@@ -208,10 +266,9 @@ function animate() {
 animate();
 
 // =====================================
-// 11. 튀김 소리 자연스러운 루프
+// 13. 튀김 소리 자연스러운 루프
 // =====================================
 
-// 오디오 요소 및 버튼
 const soundButton = document.querySelector('#soundButton');
 
 // Web Audio API
@@ -226,16 +283,15 @@ let loopSource = null;
 let isSoundPlaying = false;
 let soundEnabled = true;
 
-// 크로스페이드 길이 (초)
+// 크로스페이드 길이
 const crossfadeDuration = 0.8;
 
 // =====================================
-// 12. MP3 로딩 및 크로스페이드 생성
+// 14. MP3 로딩 및 크로스페이드 생성
 // =====================================
 
 async function loadFryingSound() {
   try {
-    // MP3 파일 불러오기
     const response = await fetch('zigle_sound.mp3');
 
     if (!response.ok) {
@@ -244,7 +300,6 @@ async function loadFryingSound() {
 
     const arrayBuffer = await response.arrayBuffer();
 
-    // 오디오 데이터 디코딩
     const originalBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
     const sampleRate = originalBuffer.sampleRate;
@@ -253,19 +308,16 @@ async function loadFryingSound() {
 
     const totalLength = originalBuffer.length;
 
-    // 크로스페이드 구간이 너무 긴 경우 방지
     if (fadeLength * 2 >= totalLength) {
       throw new Error('크로스페이드 구간이 원본 사운드보다 깁니다.');
     }
 
-    // 새로운 오디오 버퍼 생성
     loopBuffer = audioContext.createBuffer(
       originalBuffer.numberOfChannels,
       totalLength - fadeLength,
       sampleRate,
     );
 
-    // 채널별로 크로스페이드 적용
     for (
       let channel = 0;
       channel < originalBuffer.numberOfChannels;
@@ -275,10 +327,8 @@ async function loadFryingSound() {
 
       const result = loopBuffer.getChannelData(channel);
 
-      // 원본의 중간 부분 복사
       result.set(original.subarray(fadeLength, totalLength - fadeLength), 0);
 
-      // 끝부분과 시작 부분을 자연스럽게 혼합
       for (let i = 0; i < fadeLength; i++) {
         const progress = i / (fadeLength - 1);
 
@@ -293,44 +343,36 @@ async function loadFryingSound() {
     }
 
     console.log('튀김 소리 크로스페이드 준비 완료!');
-    console.log('자연스러운 반복 재생 준비 완료!');
   } catch (error) {
     console.error('튀김 소리 로딩 실패:', error);
   }
 }
 
 // =====================================
-// 13. 사운드 재생
+// 15. 사운드 재생
 // =====================================
 
 async function playSound() {
   if (!soundEnabled || isSoundPlaying) return;
 
   try {
-    // 오디오 로딩이 끝날 때까지 대기
     if (!loopBuffer) {
       await loadFryingSound();
     }
 
     if (!loopBuffer || !soundEnabled || isSoundPlaying) return;
 
-    // 브라우저 오디오 활성화
     if (audioContext.state === 'suspended') {
       await audioContext.resume();
     }
 
-    // 새로운 오디오 소스 생성
     loopSource = audioContext.createBufferSource();
 
     loopSource.buffer = loopBuffer;
-
-    // 자연스럽게 편집된 사운드를 반복
     loopSource.loop = true;
 
-    // 출력 연결
     loopSource.connect(audioContext.destination);
 
-    // 재생 시작
     loopSource.start(0);
 
     isSoundPlaying = true;
@@ -344,7 +386,7 @@ async function playSound() {
 }
 
 // =====================================
-// 14. 사운드 정지
+// 16. 사운드 정지
 // =====================================
 
 function stopSound() {
@@ -365,7 +407,7 @@ function stopSound() {
 }
 
 // =====================================
-// 15. 돼지 버튼 ON / OFF
+// 17. 돼지 버튼 ON / OFF
 // =====================================
 
 soundButton.addEventListener('click', () => {
@@ -378,7 +420,7 @@ soundButton.addEventListener('click', () => {
 });
 
 // =====================================
-// 16. 사이트 접속 시 자동 재생
+// 18. 사이트 접속 시 자동 재생
 // =====================================
 
 playSound();
@@ -388,7 +430,6 @@ playSound();
 document.addEventListener(
   'pointerdown',
   (event) => {
-    // 돼지 버튼을 누른 경우는 제외
     if (event.target.closest('#soundButton')) return;
 
     if (soundEnabled && !isSoundPlaying) {
