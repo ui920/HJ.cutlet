@@ -91,7 +91,6 @@ export function createTonkatsuSystem(scene, camera, canvas) {
 
       faceTexture.colorSpace = THREE.SRGBColorSpace;
 
-      // 구체 앞뒤에 사진이 반복되도록 설정
       faceTexture.wrapS = THREE.RepeatWrapping;
       faceTexture.wrapT = THREE.ClampToEdgeWrapping;
       faceTexture.repeat.set(2, 1);
@@ -135,22 +134,14 @@ export function createTonkatsuSystem(scene, camera, canvas) {
     // 납작한 돈까스 형태
     bodyMesh.scale.set(0.84, 0.24, 0.6);
 
-    // 돈까스가 그림자를 만들도록 설정
     bodyMesh.castShadow = true;
-
-    // 다른 돈까스의 그림자도 받을 수 있도록 설정
     bodyMesh.receiveShadow = true;
 
-    // -------------------------------------
-    // 반투명 색상 레이어 추가
-    // -------------------------------------
-
+    // 반투명 색상 레이어
     const colorOverlay = new THREE.Mesh(bodyGeometry, colorOverlayMaterial);
 
-    // 기존 몸체보다 아주 조금 크게 만들어 겹침 방지
     colorOverlay.scale.set(1.01, 1.01, 1.01);
 
-    // 몸체 위에 색상 레이어 겹치기
     bodyMesh.add(colorOverlay);
 
     group.add(bodyMesh);
@@ -202,6 +193,9 @@ export function createTonkatsuSystem(scene, camera, canvas) {
       mesh: group,
       body: physicsBody,
     });
+
+    // 호까스 생성 이벤트 전달
+    window.dispatchEvent(new Event('tonkatsu-created'));
   }
 
   // =====================================
@@ -211,7 +205,6 @@ export function createTonkatsuSystem(scene, camera, canvas) {
   function setFryerPhoto(mesh) {
     fryerPhoto = mesh;
 
-    // 튀김기 사진이 돈까스 그림자를 받도록 설정
     fryerPhoto.receiveShadow = true;
   }
 

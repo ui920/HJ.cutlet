@@ -15,7 +15,9 @@
       }
     </script>
   </head>
+
   <body>
+    <!-- 상단 움직이는 텍스트 -->
     <div class="marquee">
       <div class="track" id="marqueeTrack">
         <div class="marquee-group" id="marqueeGroupA">
@@ -32,16 +34,23 @@
       </div>
     </div>
 
+    <!-- Three.js 화면 -->
     <canvas id="webgl"></canvas>
-    <script type="module" src="./main.js"></script>
 
     <!-- 튀김 소리 -->
-    <audio id="fryingSound" src="zigle_sound.mp3" preload="auto"></audio>
-    <!-- 사운드 ON/OFF 버튼 -->
-    <button id="soundButton" class="sound-button" aria-label="소리 끄기">
-      <img src="./image/pigB.png" alt="사운드 버튼" />
+    <audio id="fryingSound" src="zigle_sound.mp3" preload="auto" loop></audio>
+
+    <!-- 생일 편지 팝업 버튼 -->
+    <button
+      id="soundButton"
+      class="sound-button"
+      aria-label="생일 편지 열기"
+      type="button"
+    >
+      <img src="./image/pigB.png" alt="생일 편지 열기" />
     </button>
 
+    <!-- 마퀴 반복 설정 -->
     <script>
       const groupA = document.querySelector('#marqueeGroupA');
       const groupB = document.querySelector('#marqueeGroupB');
@@ -49,7 +58,6 @@
       const originalContent = groupA.innerHTML;
 
       function setupMarquee() {
-        // 기존 반복 문장 초기화
         groupA.innerHTML = originalContent;
 
         const firstItem = groupA.firstElementChild;
@@ -57,21 +65,21 @@
 
         if (!itemWidth) return;
 
-        // 화면 너비보다 충분히 길어질 때까지 문장 반복
         const copies = Math.ceil((window.innerWidth * 1.5) / itemWidth);
 
         for (let i = 1; i < copies; i++) {
           groupA.appendChild(firstItem.cloneNode(true));
         }
 
-        // 완전히 동일한 두 번째 묶음 생성
         groupB.innerHTML = groupA.innerHTML;
       }
 
       setupMarquee();
 
-      // 브라우저 크기가 바뀌어도 빈 공간이 생기지 않도록 재설정
       window.addEventListener('resize', setupMarquee);
     </script>
+
+    <!-- main.js는 한 번만 호출 -->
+    <script type="module" src="./main.js"></script>
   </body>
 </html>
