@@ -89,7 +89,9 @@ body {
   background: transparent;
 
   cursor: pointer;
-  z-index: 1000;
+  z-index: 9999;
+  pointer-events: auto;
+  touch-action: manipulation;
 
   transition:
     transform 0.2s ease,

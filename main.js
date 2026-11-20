@@ -242,25 +242,22 @@ window.addEventListener('tonkatsu-created', () => {
 const soundButton = document.querySelector('#soundButton');
 
 soundButton.addEventListener('click', () => {
-  const url = './letter.html';
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
-  const w = 600;
-  const h = 700;
+  if (isMobile) {
+    // 모바일에서는 현재 탭에서 편지 페이지 열기
+    window.location.href = './letter.html';
+  } else {
+    // PC에서는 기존 팝업 방식 유지
+    const w = 600;
+    const h = 700;
+    const left = Math.round((screen.width - w) / 2);
+    const top = Math.round((screen.height - h) / 2);
 
-  const left = Math.round((screen.width - w) / 2);
-  const top = Math.round((screen.height - h) / 2);
-
-  window.open(
-    url,
-    'birthdayLetter',
-    'width=' +
-      w +
-      ',height=' +
-      h +
-      ',left=' +
-      left +
-      ',top=' +
-      top +
-      ',resizable=yes,scrollbars=yes',
-  );
+    window.open(
+      './letter.html',
+      'birthdayLetter',
+      `width=${w},height=${h},left=${left},top=${top}`,
+    );
+  }
 });
