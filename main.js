@@ -49,7 +49,7 @@ const camera = new THREE.PerspectiveCamera(
 // PC 카메라 위치는 기존 그대로 유지
 if (isMobile) {
   // 모바일에서는 정면에 가깝게 조정
-  camera.position.set(-20, 15, 19.8);
+  camera.position.set(-27, 9, 20);
 } else {
   camera.position.set(-20, 5, 18);
 }
