@@ -124,7 +124,7 @@ body {
 @media screen and (max-width: 768px) {
   .marquee {
     height: 28px;
-    font-size: 9px;
+    font-size: 8px;
   }
 
   .sound-button {
@@ -138,8 +138,8 @@ body {
 
 @media screen and (max-width: 480px) {
   .marquee {
-    height: 26px;
-    font-size: 10px;
+    height: 20px;
+    font-size: 8px;
   }
 
   .sound-button {
