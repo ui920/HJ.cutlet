@@ -5,7 +5,11 @@
 }
 
 body {
-  background: rgb(172, 238, 190);
+  background-image: url('./image/letter_bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 p {
@@ -22,10 +26,10 @@ a {
   color: black;
 }
 
-p:hover {
+/* p:hover {
   color: brown;
-}
+} */
 
 a:visited {
-  color: black;
+  color: #251700;
 }
