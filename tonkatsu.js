@@ -15,11 +15,9 @@ export function createTonkatsuSystem(scene, camera, canvas) {
   world.solver.iterations = 20;
   world.solver.tolerance = 0.001;
 
-  // 충돌 재질
   const fryerMaterial = new CANNON.Material('fryer');
   const tonkatsuMaterial = new CANNON.Material('tonkatsu');
 
-  // 튀김기 바닥과 돈까스 충돌
   world.addContactMaterial(
     new CANNON.ContactMaterial(fryerMaterial, tonkatsuMaterial, {
       friction: 0.65,
@@ -27,7 +25,6 @@ export function createTonkatsuSystem(scene, camera, canvas) {
     }),
   );
 
-  // 돈까스끼리 충돌
   world.addContactMaterial(
     new CANNON.ContactMaterial(tonkatsuMaterial, tonkatsuMaterial, {
       friction: 0.45,
@@ -35,7 +32,7 @@ export function createTonkatsuSystem(scene, camera, canvas) {
     }),
   );
 
-  // 튀김기 바닥
+  // 물리 바닥
   const floorBody = new CANNON.Body({
     mass: 0,
     material: fryerMaterial,
@@ -57,57 +54,111 @@ export function createTonkatsuSystem(scene, camera, canvas) {
   const pointer = new THREE.Vector2();
 
   let fryerPhoto = null;
-
   let pointerDownPosition = null;
 
   // =====================================
-  // 3. 돈까스 생성
+  // 3. 돈까스 얼굴 텍스처
+  // =====================================
+
+  const bodyMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    roughness: 0.9,
+    transparent: false,
+  });
+
+  const faceLoader = new THREE.TextureLoader();
+
+  faceLoader.load(
+    './image/hojeong.png',
+
+    (texture) => {
+      const image = texture.image;
+
+      const faceCanvas = document.createElement('canvas');
+      faceCanvas.width = 1024;
+      faceCanvas.height = 1024;
+
+      const ctx = faceCanvas.getContext('2d');
+
+      // 투명한 영역은 튀김옷 색상으로 채우기
+      ctx.fillStyle = '#bb7c1c';
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      // 호정 사진 적용
+      ctx.drawImage(image, 0, 0, 1024, 1024);
+
+      const faceTexture = new THREE.CanvasTexture(faceCanvas);
+
+      faceTexture.colorSpace = THREE.SRGBColorSpace;
+
+      // 구체 앞뒤에 사진이 반복되도록 설정
+      faceTexture.wrapS = THREE.RepeatWrapping;
+      faceTexture.wrapT = THREE.ClampToEdgeWrapping;
+      faceTexture.repeat.set(2, 1);
+
+      bodyMaterial.map = faceTexture;
+      bodyMaterial.needsUpdate = true;
+
+      console.log('호정 얼굴 텍스처 로딩 성공!');
+    },
+
+    undefined,
+
+    (error) => {
+      console.error('호정 얼굴 사진 로딩 실패!', error);
+    },
+  );
+
+  // =====================================
+  // 4. 반투명 색상 레이어
+  // =====================================
+
+  const colorOverlayMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffa32a,
+    transparent: true,
+    opacity: 0.25,
+    depthWrite: false,
+  });
+
+  // =====================================
+  // 5. 돈까스 생성
   // =====================================
 
   function createTonkatsu(x, z) {
     const group = new THREE.Group();
 
     // 돈까스 몸체
-    const bodyGeometry = new THREE.SphereGeometry(1, 50, 24);
-
-    const bodyMaterial = new THREE.MeshStandardMaterial({
-      color: 0xd99a32,
-      roughness: 0.9,
-    });
+    const bodyGeometry = new THREE.SphereGeometry(1, 64, 48);
 
     const bodyMesh = new THREE.Mesh(bodyGeometry, bodyMaterial);
 
-    bodyMesh.scale.set(0.7, 0.2, 0.5);
+    // 납작한 돈까스 형태
+    bodyMesh.scale.set(0.84, 0.24, 0.6);
+
+    // 돈까스가 그림자를 만들도록 설정
+    bodyMesh.castShadow = true;
+
+    // 다른 돈까스의 그림자도 받을 수 있도록 설정
+    bodyMesh.receiveShadow = true;
+
+    // -------------------------------------
+    // 반투명 색상 레이어 추가
+    // -------------------------------------
+
+    const colorOverlay = new THREE.Mesh(bodyGeometry, colorOverlayMaterial);
+
+    // 기존 몸체보다 아주 조금 크게 만들어 겹침 방지
+    colorOverlay.scale.set(1.01, 1.01, 1.01);
+
+    // 몸체 위에 색상 레이어 겹치기
+    bodyMesh.add(colorOverlay);
 
     group.add(bodyMesh);
-
-    // 빵가루
-    const crumbMaterial = new THREE.MeshStandardMaterial({
-      color: 0xf2c46d,
-      roughness: 1,
-    });
-
-    for (let i = 0; i < 35; i++) {
-      const crumbGeometry = new THREE.SphereGeometry(0.035, 6, 6);
-
-      const crumb = new THREE.Mesh(crumbGeometry, crumbMaterial);
-
-      const angle = Math.random() * Math.PI * 2;
-      const radius = Math.sqrt(Math.random()) * 0.55;
-
-      crumb.position.set(
-        Math.cos(angle) * radius,
-        0.17 + Math.random() * 0.04,
-        Math.sin(angle) * radius,
-      );
-
-      group.add(crumb);
-    }
 
     scene.add(group);
 
     // =====================================
-    // 4. 돈까스 물리 객체
+    // 6. 돈까스 물리 객체
     // =====================================
 
     const physicsBody = new CANNON.Body({
@@ -147,7 +198,6 @@ export function createTonkatsuSystem(scene, camera, canvas) {
 
     world.addBody(physicsBody);
 
-    // 돈까스 목록에 저장
     tonkatsus.push({
       mesh: group,
       body: physicsBody,
@@ -155,15 +205,18 @@ export function createTonkatsuSystem(scene, camera, canvas) {
   }
 
   // =====================================
-  // 5. 튀김기 사진 지정
+  // 7. 튀김기 사진 지정
   // =====================================
 
   function setFryerPhoto(mesh) {
     fryerPhoto = mesh;
+
+    // 튀김기 사진이 돈까스 그림자를 받도록 설정
+    fryerPhoto.receiveShadow = true;
   }
 
   // =====================================
-  // 6. 마우스 클릭 위치 기록
+  // 8. 마우스 클릭 위치 기록
   // =====================================
 
   canvas.addEventListener('pointerdown', (event) => {
@@ -174,7 +227,7 @@ export function createTonkatsuSystem(scene, camera, canvas) {
   });
 
   // =====================================
-  // 7. 마우스 클릭 이벤트
+  // 9. 마우스 클릭 이벤트
   // =====================================
 
   canvas.addEventListener('pointerup', (event) => {
@@ -190,7 +243,6 @@ export function createTonkatsuSystem(scene, camera, canvas) {
     // 드래그는 클릭으로 처리하지 않음
     if (distance > 5) return;
 
-    // 마우스 위치 계산
     const rect = canvas.getBoundingClientRect();
 
     pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -200,7 +252,7 @@ export function createTonkatsuSystem(scene, camera, canvas) {
     raycaster.setFromCamera(pointer, camera);
 
     // =====================================
-    // 8. 기존 돈까스 클릭 확인
+    // 10. 기존 돈까스 클릭 확인
     // =====================================
 
     const tonkatsuMeshes = tonkatsus.map((item) => item.mesh);
@@ -208,7 +260,6 @@ export function createTonkatsuSystem(scene, camera, canvas) {
     const tonkatsuHits = raycaster.intersectObjects(tonkatsuMeshes, true);
 
     if (tonkatsuHits.length > 0) {
-      // 클릭한 빵가루 또는 몸체의 부모 Group 찾기
       let clickedObject = tonkatsuHits[0].object;
 
       while (
@@ -225,9 +276,8 @@ export function createTonkatsuSystem(scene, camera, canvas) {
       if (selectedTonkatsu) {
         const body = selectedTonkatsu.body;
 
-        // 바닥에 안정적으로 착지한 돈까스만 반응
+        // 착지한 돈까스만 반응
         if (body.sleepState === CANNON.Body.SLEEPING) {
-          // 물리엔진 깨우기
           body.wakeUp();
 
           // 위쪽으로 튀어 오르기
@@ -250,7 +300,7 @@ export function createTonkatsuSystem(scene, camera, canvas) {
     }
 
     // =====================================
-    // 9. 튀김기 사진 클릭 확인
+    // 11. 튀김기 사진 클릭 확인
     // =====================================
 
     if (!fryerPhoto) return;
@@ -266,22 +316,20 @@ export function createTonkatsuSystem(scene, camera, canvas) {
   });
 
   // =====================================
-  // 10. 물리엔진 업데이트
+  // 12. 물리엔진 업데이트
   // =====================================
 
   function update(delta) {
     world.step(1 / 60, delta, 5);
 
-    // 물리엔진 위치와 회전을 화면에 반영
     tonkatsus.forEach((item) => {
       item.mesh.position.copy(item.body.position);
-
       item.mesh.quaternion.copy(item.body.quaternion);
     });
   }
 
   // =====================================
-  // 11. 외부 연결
+  // 13. 외부 연결
   // =====================================
 
   return {

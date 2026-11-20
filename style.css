@@ -22,21 +22,10 @@ body {
   outline: none;
 }
 
-/* .guide {
-  position: fixed;
-  top: 24px;
-  right: 28px;
-  z-index: 10;
-  padding: 7px 12px;
-  background: white;
-  color: #222;
-  border-radius: 20px;
-  font-family: Arial, sans-serif;
-  font-size: 11px;
-  pointer-events: none;
-} */
+/* =====================================
+   움직이는 텍스트 영역
+===================================== */
 
-/* 움직이는 텍스트 영역 */
 .marquee {
   position: fixed;
   top: 0;
@@ -45,8 +34,10 @@ body {
   height: 35px;
   overflow: hidden;
   z-index: 99;
+
   display: flex;
   align-items: center;
+
   background-color: #eacf03;
   color: #111;
   font-size: 13px;
@@ -81,4 +72,43 @@ body {
   to {
     transform: translateX(-50%);
   }
+}
+
+/* =====================================
+돼지 사운드 버튼
+===================================== */
+
+.sound-button {
+  position: fixed;
+
+  /* 마퀴 바로 아래 오른쪽 */
+  top: 50px;
+  right: 30px;
+
+  width: 150px;
+  height: 150px;
+
+  padding: 0;
+  border: none;
+  background: transparent;
+
+  cursor: pointer;
+  z-index: 1000;
+
+  transition: transform 0.2s ease;
+}
+
+.sound-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.sound-button:hover {
+  transform: scale(1.1);
+}
+
+.sound-button:active {
+  transform: scale(0.9);
 }

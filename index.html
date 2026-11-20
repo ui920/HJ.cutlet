@@ -34,6 +34,14 @@
 
     <canvas id="webgl"></canvas>
     <script type="module" src="./main.js"></script>
+
+    <!-- 튀김 소리 -->
+    <audio id="fryingSound" src="zigle_sound.mp3" preload="auto"></audio>
+    <!-- 사운드 ON/OFF 버튼 -->
+    <button id="soundButton" class="sound-button" aria-label="소리 끄기">
+      <img src="./image/pigB.png" alt="사운드 버튼" />
+    </button>
+
     <!-- <script type="module" src="./tonkatsu.js"></script> -->
     <script>
       const groupA = document.querySelector('#marqueeGroupA');
