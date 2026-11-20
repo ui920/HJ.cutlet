@@ -11,10 +11,6 @@ body {
   overflow: hidden;
 }
 
-body {
-  background-color: #87ceeb;
-}
-
 #webgl {
   display: block;
   width: 100%;
@@ -23,7 +19,7 @@ body {
 }
 
 /* =====================================
-   움직이는 텍스트 영역
+움직이는 텍스트 영역
 ===================================== */
 
 .marquee {
@@ -31,17 +27,19 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 35px;
+  height: 33px;
   overflow: hidden;
   z-index: 99;
 
   display: flex;
   align-items: center;
 
-  background-color: #eacf03;
-  color: #111;
-  font-size: 13px;
-  font-weight: 600;
+  background-color: #01ffffd4;
+  color: #251700;
+  /* color: #ffee03f1; */
+
+  font-size: 13.5px;
+  font-weight: 700;
 }
 
 .track {
@@ -82,8 +80,8 @@ body {
   position: fixed;
 
   /* 마퀴 바로 아래 오른쪽 */
-  top: 50px;
-  right: 30px;
+  top: 1000px;
+  right: 35px;
 
   width: 150px;
   height: 150px;
@@ -103,6 +101,16 @@ body {
   height: 100%;
   object-fit: contain;
   display: block;
+}
+
+.sound-button:hover {
+  transform: scale(1.1);
+  opacity: 0.7;
+}
+
+.sound-button:hover img {
+  filter: brightness(0) saturate(100%) invert(80%) sepia(75%) saturate(2500%)
+    hue-rotate(116deg) brightness(103%) contrast(105%);
 }
 
 .sound-button:hover {

@@ -33,13 +33,13 @@ bgLoader.load(
 // =====================================
 
 const camera = new THREE.PerspectiveCamera(
-  45,
+  40,
   window.innerWidth / window.innerHeight,
   0.1,
   1000,
 );
 
-camera.position.set(-20, 8, 18);
+camera.position.set(-20, 5, 18);
 
 // =====================================
 // 4. Renderer
@@ -139,7 +139,7 @@ loader.load(
 
     const aspectRatio = imageWidth / imageHeight;
 
-    const planeWidth = 54;
+    const planeWidth = 40;
     const planeHeight = planeWidth / aspectRatio;
 
     const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);

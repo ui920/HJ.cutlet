@@ -81,7 +81,7 @@ export function createTonkatsuSystem(scene, camera, canvas) {
       const ctx = faceCanvas.getContext('2d');
 
       // 투명한 영역은 튀김옷 색상으로 채우기
-      ctx.fillStyle = '#bb7c1c';
+      ctx.fillStyle = '#bb861c';
       ctx.fillRect(0, 0, 1024, 1024);
 
       // 호정 사진 적용
@@ -114,9 +114,9 @@ export function createTonkatsuSystem(scene, camera, canvas) {
   // =====================================
 
   const colorOverlayMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffa32a,
+    color: 0xbb5e1c,
     transparent: true,
-    opacity: 0.25,
+    opacity: 0.35,
     depthWrite: false,
   });
 
